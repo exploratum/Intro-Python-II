@@ -1,4 +1,7 @@
 from room import Room
+from player import Player
+from lightSource import LightSource
+import textwrap
 
 # Declare all the rooms
 
@@ -33,19 +36,151 @@ room['narrow'].w_to = room['foyer']
 room['narrow'].n_to = room['treasure']
 room['treasure'].s_to = room['narrow']
 
+
+
 #
 # Main
 #
+# Some initializations
+room['foyer'].items.append(LightSource("lamp", "your portable source of light"))
+room['overlook'].is_light = True
 
 # Make a new player object that is currently in the 'outside' room.
+
+player = Player('John Doe', room['outside'])
 
 # Write a loop that:
 #
 # * Prints the current room name
 # * Prints the current description (the textwrap module might be useful here).
+command = None
+
+
+
+while not command == 'q':
+
+    #check if player has a lamp
+    player_has_lamp = False
+    for item in player.items:
+        if isinstance(item, LightSource):
+            player_has_lamp = True
+            break
+
+    #check if room has a LightSource
+    room_has_lightSource = False 
+    for item in player.current_room.items:
+        if isinstance(item, LightSource):
+            room_has_lightSource = True
+            break
+
+    #check if room naturally illuminated
+    has_natural_light = player.current_room.is_light
+
+    light_is_present = player_has_lamp or room_has_lightSource or has_natural_light
+
+    if light_is_present:
+
+        # Print room where player is at
+        print(f"\n{player.name} is at: {player.current_room.name}\n")
+
+        # print description of room where the player is at
+        wrapper = textwrap.TextWrapper(width=50)
+        description = wrapper.wrap(text=player.current_room.description)
+        print("description:")
+        for line in description:
+            print(line)
+
+        # print list of items present in the room where the player is at
+        print("\nitems in this room:")
+        for item in player.current_room.items:
+            print(f"-{item.name}")
+        print("**********************")
+
+    else:
+        print("\n>>>>IT IS PITCH BLACK!\n")
+
+    
+    # relate user input to the possible directions from the player current room
+    to_room = {
+        'n': player.current_room.n_to,
+        's': player.current_room.s_to,
+        'e': player.current_room.e_to,
+        'w': player.current_room.w_to,
+    }
+    
+
 # * Waits for user input and decides what to do.
-#
 # If the user enters a cardinal direction, attempt to move to the room there.
 # Print an error message if the movement isn't allowed.
-#
 # If the user enters "q", quit the game.
+
+    commands = input(
+        "enter directions:(n)orth, (s)outh, (e)ast. (w)est\n"
+        "choose action: get/take item, drop item\n"
+        "or (q)uit:"
+
+        ).split(' ')
+    
+    #change all commands to lower case
+    for command in commands:
+        command = command.lower()
+
+    # case: direction commands
+    if len(commands) == 1:
+        command = commands[0].strip()  #remove leading and trailing spaces
+        if command in ['n', 's', 'e', 'w']:
+            if(to_room[command] == None):
+                print("\n>>> MOVE NOT ALLOWED. TRY AGAIN...")
+                print("************************************")
+            else:
+                player.current_room = to_room[command]
+        elif command == 'i':
+            print("items you have:")
+            for item in player.items:
+                print(item)
+    
+    # case: collecting items commands
+    elif len(commands) == 2:
+
+        action = commands[0]
+
+        item_txt = commands[1]
+
+        if action == 'get' or action == 'take':
+
+            if light_is_present:
+
+                item_found = False
+                for item in player.current_room.items:
+                    if item.name == item_txt:
+                        player.current_room.items.remove(item)
+                        player.items.append(item)
+                        item.on_take()
+                        item_found = True
+                        break
+                if item_found == False:
+                    print("The item you want to get/take is not in this room")
+
+            else:
+                print(">>>> GOOD LUCK FINDING THAT IN THE DARK!")
+
+        elif action == 'drop':
+            had_item = False
+            for item in player.items:
+                if item.name == item_txt:
+                    player.items.remove(item)
+                    player.current_room.items.append(item)
+                    item.on_drop()
+                    had_item = True
+                    break
+            if had_item == False:
+                print("You do not have the item you want to drop")
+
+        else:
+            print("command not recognized. get/take to add an item or drop to drop an item")
+        
+            
+
+    
+
+    
