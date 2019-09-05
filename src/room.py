@@ -11,3 +11,4 @@ class Room():
         self.s_to = None
         self.w_to = None
         self.items = [Item('item0', "Default item in every room")]
+        self.is_light = False
