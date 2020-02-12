@@ -2,7 +2,7 @@
 # description attributes.
 from item import Item
 
-class Room():
+class Room:
     def __init__(self, name, description):
         self.name = name
         self.description = description
