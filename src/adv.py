@@ -81,6 +81,7 @@ while not command == 'q':
     if light_is_present:
 
         # Print room where player is at
+        print("************************")
         print(f"\n{player.name} is at: {player.current_room.name}\n")
 
         # print description of room where the player is at
