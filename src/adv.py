@@ -2,6 +2,7 @@ from room import Room
 from player import Player
 from lightSource import LightSource
 import textwrap
+import style
 
 # Declare all the rooms
 
@@ -55,10 +56,11 @@ player = Player('John Doe', room['outside'])
 # * Prints the current description (the textwrap module might be useful here).
 command = None
 
-
+print("testing style here !!!!!!!!!!")
+style.red("TESTING !!!!!!!!!!!!!!!!!!")
 
 while not command == 'q':
-
+    
     #check if player has a lamp
     player_has_lamp = False
     for item in player.items:
